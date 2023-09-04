@@ -1,2 +1,2 @@
-# ing_connect_fairness
-INGA Connect Fairness 2023 Workshop
+# ING Analytics Connect 2023 Fairness Workshop
+Code Repository for INGA Connect Fairness Workshop.
