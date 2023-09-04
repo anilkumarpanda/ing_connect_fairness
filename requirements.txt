@@ -1,4 +1,0 @@
-pandas
-shap
-scikit-learn
-xgboost==1.6
