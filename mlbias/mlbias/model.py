@@ -191,3 +191,47 @@ def perf_metrics(y_true, y_score, pos=1, neg=0, res=0.01):
                                           ignore_index=True)
 
     return prauc_frame
+
+def get_confusion_matrix(frame, y, yhat, by=None, level=None, cutoff=0.5):
+    """
+    Creates confusion matrix from pandas dataframe of y and yhat values,
+    can be sliced by a variable and level.
+
+    Args:
+        frame: Pandas dataframe of actual (y) and predicted (yhat) values.
+        y: Name of actual value column.
+        yhat: Name of predicted value column.
+        by: By variable to slice frame before creating confusion matrix, default None.
+        level: Value of by variable to slice frame before creating confusion matrix, default None.
+        cutoff: Cutoff threshold for confusion matrix, default 0.5.
+
+    Returns:
+        Confusion matrix as pandas dataframe.
+    """
+
+    # determine levels of target (y) variable
+    # sort for consistency
+    level_list = list(frame[y].unique())
+    level_list.sort(reverse=True)
+
+    # init confusion matrix
+    cm_frame = pd.DataFrame(columns=['actual: ' +  str(i) for i in level_list],
+                            index=['predicted: ' + str(i) for i in level_list])
+
+    # don't destroy original data
+    frame_ = frame.copy(deep=True)
+
+    # convert numeric predictions to binary decisions using cutoff
+    dname = 'd_' + str(y)
+    frame_[dname] = np.where(frame_[yhat] > cutoff , 1, 0)
+
+    # slice frame
+    if (by is not None) & (level is not None):
+        frame_ = frame_[frame[by] == level]
+
+    # calculate size of each confusion matrix value
+    for i, lev_i in enumerate(level_list):
+        for j, lev_j in enumerate(level_list):
+            cm_frame.iat[j, i] = frame_[(frame_[y] == lev_i) & (frame_[dname] == lev_j)].shape[0]
+
+    return cm_frame
